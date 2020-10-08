@@ -1,0 +1,159 @@
+---
+title: "ProjectCode"
+author: "Colleen Moore"
+date: "10/8/2020"
+output:
+  rmarkdown::github_document:
+    toc: TRUE
+params:
+  day: ""
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(caret)
+library(rmarkdown)
+library(corrplot)
+library(kableExtra)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+*This analysis is for `r capitalize(params$day) `*
+
+Read in data
+```{r, messge=F, warning=FALSE}
+news<- read_csv("OnlineNewsPopularity.csv")
+```
+
+
+Filter for the day of the week
+```{r}
+dailyNews <- filter(news, news[[paste0("weekday_is_",params$day)]] == "1")
+```
+
+### Variable selection 
+```{r}
+dailyNews<- dailyNews %>% 
+  mutate(channel= case_when(data_channel_is_bus == 1 ~ "Business",
+                                         data_channel_is_entertainment==1 ~"Entertainment",
+                                            data_channel_is_lifestyle== 1 ~ "Lifesytle",
+                                            data_channel_is_socmed==1 ~ "SocialMedia",
+                                            data_channel_is_tech==1 ~ "Tech",
+                                            data_channel_is_world== 1 ~ "World")) %>% select(n_tokens_title, n_tokens_content, n_unique_tokens, num_imgs, num_self_hrefs, average_token_length, title_sentiment_polarity, global_sentiment_polarity, shares, channel)
+```
+
+Check dataset for missing values
+```{r}
+dailyNews %>% summarise_all(funs(sum(is.na(.))))
+```
+
+Since I created a new variable channel, some news articles did not fall into any of the listed categories and so are NA values. Replace the NA values with "None"
+
+```{r}
+dailyNews$channel <- ifelse(is.na(dailyNews$channel), "None", dailyNews$channel)
+```
+
+##  Create Training and Test Sets
+
+Split data into training and test set- 70% of the data will be used for training and 30% will be used for testing. 
+```{r}
+set.seed(2011)
+train <- sample(1:nrow(dailyNews), size = nrow(dailyNews)*0.7)
+test <- setdiff(1:nrow(dailyNews), train)
+dailyNewsTrain <- dailyNews[train, ]
+dailyNewsTest <- dailyNews[test, ]
+```
+
+## Summarizations
+
+Quick summary of all the variables in the dataset. Wanted to get an idea of the ranges of the variables. 
+```{r}
+kable(apply(dailyNewsTrain[1:9], 2, summary), caption = paste("Summary of Variables"), digits= 1)
+```
+
+
+Correlation plot of variable choosen to be included in model. seeing if any of the chosen variables are highly correlated with the response variable shares or among each other. 
+```{r}
+correlation <- dailyNewsTrain %>% keep(is.numeric) %>% cor()
+corrplot(correlation)
+```
+
+
+Boxplots of all the variables to be used in the model to get an idea of shape and if outliers are present. 
+```{r}
+dailyNewsTrain %>%
+keep(is.numeric) %>%
+pivot_longer(everything()) %>%
+ggplot(aes(x = value)) +
+facet_wrap(~ name, scales = "free") +
+geom_boxplot()
+```
+
+None of the variables appear to have a high correlation with the shares variable. Below is a plot of number of links of other articles and shares category.  
+```{r}
+ggplot(dailyNewsTrain, aes(num_self_hrefs, shares))+ geom_point()+ geom_jitter() + labs(x= "Number of links to other articles", y= "Number of times shared category", title= "Links and Number of Times Shared")
+```
+
+
+## Modeling
+
+### Tree based Model
+The first model is a classification tree-based model (not ensemble) using leave one out cross validation. I will be using rpart from the `caret` package for this tree. 
+
+```{r}
+
+Tree_fit<- train(shares ~.,  data= dailyNewsTrain, method= "rpart",
+                 trControl=trainControl(method = "LOOCV"),
+                preProcess = c("center", "scale"))
+
+Tree_fit
+```
+
+
+
+See how this model did on the training dataset
+```{r}
+pred_Tree_fit<- predict(Tree_fit, newdata= dailyNewsTest)
+modelA<- postResample(pred_Tree_fit, obs= dailyNewsTest$shares)
+modelA
+```
+
+### Boosted Tree Model
+The next model is a classification boosted tree model with parameters choosen using cross validation.  I chose the Stochastic Gradient Boosting method (gbm method). 
+```{r}
+fit_control <- trainControl(method="cv", number=10)
+
+grid <- expand.grid(n.trees=c(25, 50, 100, 200,500), shrinkage=c(0.05, 0.1, 0.15),
+                    n.minobsinnode = c(5,10, 15),interaction.depth=1)
+
+boostedTree <-train(shares ~ ., data= dailyNewsTrain, method='gbm', trControl=fit_control, tuneGrid=grid, verbose= FALSE)
+
+boostedTree
+```
+
+Test the model on the test dataset. 
+```{r}
+pred_boostedTree<- predict(boostedTree, newdata= dailyNewsTest)
+modelB<- postResample(pred_boostedTree, obs= dailyNewsTest$shares)
+modelB
+```
+
+
+Out of the two models, the one with the lowest RMSE of  `r  round(min(modelA[1], modelB[1]),4)` was the `r ifelse(modelA[1] < modelB[1], "tree based model", "boosted tree model")`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
