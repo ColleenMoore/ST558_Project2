@@ -30,7 +30,9 @@ For the model building, the variables that I think are important include:
 * n_unique_tokens: Rate of unique words in the content    
 * num_imgs: Number of images     
 * num_self_hrefs: Number of links to other articles published by Mashable   
-* average_token_length: Average length of the words in the content    
+* average_token_length: Average length of the words in the content  
+* is_weekend: Is it a weekend day? 
+* self_reference_avg_sharess: Avg. shares of referenced articles in Mashable 
 * global_sentiment_polarity: Text sentiment polarity
 * data_channel - which is  a derived variable from:
     + data_channel_is_lifestyle: Is data channel 'Lifestyle'? 
@@ -40,6 +42,7 @@ For the model building, the variables that I think are important include:
     + data_channel_is_tech: Is data channel 'Tech'? 
     + data_channel_is_world: Is data channel 'World'? 
 * title_sentiment_polarity: Title polarity 
+
 
 We are asked to build a tree- based model using leave one out cross validation and a boosted tree model using cross validation. 
 
@@ -51,10 +54,9 @@ For the boosted tree model, I will be again using the `caret` package to produce
 
 I would expect the boosted tree model to perform better for all the predictions. 
 
-I wanted to get an idea of the data that I'll be using in this project. 
-
 
 ## Read in the data
+To get an idea of the data I will be working with. 
 ```{r, message=F, warning=F}
 news<- read_csv("OnlineNewsPopularity.csv")
 ```
@@ -96,11 +98,17 @@ apply(reports, MARGIN = 1, FUN = function(x){
 
 ## Daily Analysis
 The analysis for [Monday is available here](MondayAnalysis.md).
+
 The analysis for [Tuesday is available here](TuesdayAnalysis.md).
+
 The analysis for [Wednesday is available here](WednesdayAnalysis.md).
+
 The analysis for [Thursday is available here](ThursdayAnalysis.md).
+
 The analysis for [Friday is available here](FridayAnalysis.md).
+
 The analysis for [Saturday is available here](SaturdayAnalysis.md).
+
 The analysis for [Sunday is available here](SundayAnalysis.md).
 
 

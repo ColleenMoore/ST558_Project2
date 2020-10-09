@@ -3,26 +3,21 @@ ProjectCode
 Colleen Moore
 10/8/2020
 
--   [Variable selection](#variable-selection)
--   [Create Training and Test Sets](#create-training-and-test-sets)
--   [Summarizations](#summarizations)
--   [Modeling](#modeling)
-    -   [Tree based Model](#tree-based-model)
-    -   [Boosted Tree Model](#boosted-tree-model)
+-   [\*\* Analysis for Saturday\*\*](#analysis-for-saturday)
+    -   [Variable selection](#variable-selection)
+    -   [Create Training and Test Sets](#create-training-and-test-sets)
+    -   [Summarizations](#summarizations)
+    -   [Modeling](#modeling)
+        -   [Tree based Model](#tree-based-model)
+        -   [Boosted Tree Model](#boosted-tree-model)
+    -   [Best Model](#best-model)
 
-*This analysis is for Saturday*
+\*\* Analysis for Saturday\*\*
+==============================
 
 Read in data
 
     news<- read_csv("OnlineNewsPopularity.csv")
-
-    ## Parsed with column specification:
-    ## cols(
-    ##   .default = col_double(),
-    ##   url = col_character()
-    ## )
-
-    ## See spec(...) for full column specifications.
 
 Filter for the day of the week
 
@@ -30,25 +25,122 @@ Filter for the day of the week
 
 ### Variable selection
 
+The variables I chose were:
+
+-   n\_tokens\_title: Number of words in the title  
+-   n\_tokens\_content: Number of words in the content  
+-   n\_unique\_tokens: Rate of unique words in the content  
+-   num\_imgs: Number of images  
+-   num\_self\_hrefs: Number of links to other articles published by
+    Mashable  
+-   average\_token\_length: Average length of the words in the content  
+-   self\_reference\_avg\_sharess: Avg. shares of referenced articles in
+    Mashable
+-   global\_sentiment\_polarity: Text sentiment polarity
+-   data\_channel - which is a derived variable from:
+    -   data\_channel\_is\_lifestyle: Is data channel ‘Lifestyle’?
+    -   data\_channel\_is\_entertainment: Is data channel
+        ‘Entertainment’?
+    -   data\_channel\_is\_bus: Is data channel ‘Business’?
+    -   data\_channel\_is\_socmed: Is data channel ‘Social Media’?
+    -   data\_channel\_is\_tech: Is data channel ‘Tech’?
+    -   data\_channel\_is\_world: Is data channel ‘World’?
+-   title\_sentiment\_polarity: Title polarity
+
+<!-- -->
+
     dailyNews<- dailyNews %>% 
       mutate(channel= case_when(data_channel_is_bus == 1 ~ "Business",
                                              data_channel_is_entertainment==1 ~"Entertainment",
                                                 data_channel_is_lifestyle== 1 ~ "Lifesytle",
                                                 data_channel_is_socmed==1 ~ "SocialMedia",
                                                 data_channel_is_tech==1 ~ "Tech",
-                                                data_channel_is_world== 1 ~ "World")) %>% select(n_tokens_title, n_tokens_content, n_unique_tokens, num_imgs, num_self_hrefs, average_token_length, title_sentiment_polarity, global_sentiment_polarity, shares, channel)
+                                                data_channel_is_world== 1 ~ "World")) %>% 
+      select(n_tokens_title, n_tokens_content, n_unique_tokens, num_imgs, num_self_hrefs, 
+             average_token_length, title_sentiment_polarity, global_sentiment_polarity,
+             self_reference_avg_sharess, shares, channel)
 
 Check dataset for missing values
 
-    dailyNews %>% summarise_all(funs(sum(is.na(.))))
+    miss<- dailyNews %>% summarise_all(funs(sum(is.na(.))))
+    kable(miss)
 
-    ## # A tibble: 1 x 10
-    ##   n_tokens_title n_tokens_content n_unique_tokens num_imgs num_self_hrefs
-    ##            <int>            <int>           <int>    <int>          <int>
-    ## 1              0                0               0        0              0
-    ## # … with 5 more variables: average_token_length <int>,
-    ## #   title_sentiment_polarity <int>, global_sentiment_polarity <int>,
-    ## #   shares <int>, channel <int>
+<table>
+<thead>
+<tr>
+<th style="text-align:right;">
+n\_tokens\_title
+</th>
+<th style="text-align:right;">
+n\_tokens\_content
+</th>
+<th style="text-align:right;">
+n\_unique\_tokens
+</th>
+<th style="text-align:right;">
+num\_imgs
+</th>
+<th style="text-align:right;">
+num\_self\_hrefs
+</th>
+<th style="text-align:right;">
+average\_token\_length
+</th>
+<th style="text-align:right;">
+title\_sentiment\_polarity
+</th>
+<th style="text-align:right;">
+global\_sentiment\_polarity
+</th>
+<th style="text-align:right;">
+self\_reference\_avg\_sharess
+</th>
+<th style="text-align:right;">
+shares
+</th>
+<th style="text-align:right;">
+channel
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+424
+</td>
+</tr>
+</tbody>
+</table>
 
 Since I created a new variable channel, some news articles did not fall
 into any of the listed categories and so are NA values. Replace the NA
@@ -74,7 +166,7 @@ Summarizations
 Quick summary of all the variables in the dataset. Wanted to get an idea
 of the ranges of the variables.
 
-    kable(apply(dailyNewsTrain[1:9], 2, summary), caption = paste("Summary of Variables"), digits= 1)
+    kable(apply(dailyNewsTrain[1:10], 2, summary), caption = paste("Summary of Variables"), digits= 1)
 
 <table>
 <caption>
@@ -107,6 +199,9 @@ title\_sentiment\_polarity
 </th>
 <th style="text-align:right;">
 global\_sentiment\_polarity
+</th>
+<th style="text-align:right;">
+self\_reference\_avg\_sharess
 </th>
 <th style="text-align:right;">
 shares
@@ -143,6 +238,9 @@ Min.
 -0.3
 </td>
 <td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:right;">
 49.0
 </td>
 </tr>
@@ -173,6 +271,9 @@ Min.
 </td>
 <td style="text-align:right;">
 0.1
+</td>
+<td style="text-align:right;">
+1000.0
 </td>
 <td style="text-align:right;">
 1300.0
@@ -207,6 +308,9 @@ Median
 0.1
 </td>
 <td style="text-align:right;">
+2340.0
+</td>
+<td style="text-align:right;">
 2000.0
 </td>
 </tr>
@@ -237,6 +341,9 @@ Mean
 </td>
 <td style="text-align:right;">
 0.1
+</td>
+<td style="text-align:right;">
+5358.3
 </td>
 <td style="text-align:right;">
 4023.7
@@ -271,6 +378,9 @@ Mean
 0.2
 </td>
 <td style="text-align:right;">
+5200.0
+</td>
+<td style="text-align:right;">
 3600.0
 </td>
 </tr>
@@ -303,13 +413,16 @@ Max.
 0.6
 </td>
 <td style="text-align:right;">
+309412.0
+</td>
+<td style="text-align:right;">
 617900.0
 </td>
 </tr>
 </tbody>
 </table>
 
-Correlation plot of variable choosen to be included in model. seeing if
+Correlation plot of variable choosen to be included in model. Seeing if
 any of the chosen variables are highly correlated with the response
 variable shares or among each other.
 
@@ -317,6 +430,9 @@ variable shares or among each other.
     corrplot(correlation)
 
 ![](SaturdayAnalysis_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
+None of the variables appear to have a high correlation with the shares
+variable.
 
 Boxplots of all the variables to be used in the model to get an idea of
 shape and if outliers are present.
@@ -330,11 +446,13 @@ shape and if outliers are present.
 
 ![](SaturdayAnalysis_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
-None of the variables appear to have a high correlation with the shares
-variable. Below is a plot of number of links of other articles and
-shares category.
+Below is a plot of self\_reference\_avg\_sharess (Avg. shares of
+referenced articles in Mashable) and shares category.
 
-    ggplot(dailyNewsTrain, aes(num_self_hrefs, shares))+ geom_point()+ geom_jitter() + labs(x= "Number of links to other articles", y= "Number of times shared category", title= "Links and Number of Times Shared")
+    ggplot(dailyNewsTrain, aes(self_reference_avg_sharess,shares))+ 
+      geom_point()+ geom_jitter() + 
+      labs(x= "Number of links to other articles", y= "Number of times shared category", 
+           title= "Links and Number of Times Shared")
 
 ![](SaturdayAnalysis_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
@@ -356,29 +474,29 @@ using leave one out cross validation. I will be using rpart from the
     ## CART 
     ## 
     ## 1717 samples
-    ##    9 predictor
+    ##   10 predictor
     ## 
-    ## Pre-processing: centered (14), scaled (14) 
+    ## Pre-processing: centered (15), scaled (15) 
     ## Resampling: Leave-One-Out Cross-Validation 
     ## Summary of sample sizes: 1716, 1716, 1716, 1716, 1716, 1716, ... 
     ## Resampling results across tuning parameters:
     ## 
     ##   cp           RMSE      Rsquared      MAE     
-    ##   0.001624757  16311.05  0.0004650513  3546.079
-    ##   0.001980541  16262.35  0.0008718615  3432.712
-    ##   0.023284879  16390.68  0.0004356951  3898.785
+    ##   0.001289565  17647.54  3.962365e-05  3876.199
+    ##   0.001624757  17615.62  1.827820e-05  3883.915
+    ##   0.043547621  17628.98  2.764539e-07  4176.652
     ## 
     ## RMSE was used to select the optimal model using the smallest value.
-    ## The final value used for the model was cp = 0.001980541.
+    ## The final value used for the model was cp = 0.001624757.
 
-See how this model did on the training dataset
+Test the tree based model on the test data set.
 
     pred_Tree_fit<- predict(Tree_fit, newdata= dailyNewsTest)
     modelA<- postResample(pred_Tree_fit, obs= dailyNewsTest$shares)
     modelA
 
     ##         RMSE     Rsquared          MAE 
-    ## 1.041058e+04 7.108908e-05 3.785482e+03
+    ## 1.038594e+04 7.421950e-05 3.586352e+03
 
 ### Boosted Tree Model
 
@@ -391,14 +509,15 @@ method (gbm method).
     grid <- expand.grid(n.trees=c(25, 50, 100, 200,500), shrinkage=c(0.05, 0.1, 0.15),
                         n.minobsinnode = c(5,10, 15),interaction.depth=1)
 
-    boostedTree <-train(shares ~ ., data= dailyNewsTrain, method='gbm', trControl=fit_control, tuneGrid=grid, verbose= FALSE)
+    boostedTree <-train(shares ~ ., data= dailyNewsTrain, method='gbm',
+                        trControl=fit_control, tuneGrid=grid, verbose= FALSE)
 
     boostedTree
 
     ## Stochastic Gradient Boosting 
     ## 
     ## 1717 samples
-    ##    9 predictor
+    ##   10 predictor
     ## 
     ## No pre-processing
     ## Resampling: Cross-Validated (10 fold) 
@@ -406,51 +525,51 @@ method (gbm method).
     ## Resampling results across tuning parameters:
     ## 
     ##   shrinkage  n.minobsinnode  n.trees  RMSE      Rsquared    MAE     
-    ##   0.05        5               25      9672.565  0.01608517  3337.466
-    ##   0.05        5               50      9701.743  0.01727057  3342.309
-    ##   0.05        5              100      9727.296  0.01781204  3356.875
-    ##   0.05        5              200      9753.523  0.01825139  3391.134
-    ##   0.05        5              500      9791.289  0.02018342  3422.752
-    ##   0.05       10               25      9675.684  0.01500918  3335.787
-    ##   0.05       10               50      9707.502  0.01626998  3353.481
-    ##   0.05       10              100      9740.472  0.01655626  3390.920
-    ##   0.05       10              200      9770.435  0.01591208  3421.492
-    ##   0.05       10              500      9778.147  0.01954441  3422.496
-    ##   0.05       15               25      9696.261  0.01719249  3378.689
-    ##   0.05       15               50      9717.060  0.01810519  3370.523
-    ##   0.05       15              100      9737.028  0.01813825  3391.576
-    ##   0.05       15              200      9761.417  0.01804189  3395.287
-    ##   0.05       15              500      9792.289  0.01816777  3433.297
-    ##   0.10        5               25      9719.333  0.01751118  3360.322
-    ##   0.10        5               50      9737.361  0.01797478  3376.682
-    ##   0.10        5              100      9742.129  0.01885544  3371.215
-    ##   0.10        5              200      9764.178  0.02039290  3420.772
-    ##   0.10        5              500      9808.700  0.02394150  3446.801
-    ##   0.10       10               25      9699.135  0.01806321  3335.119
-    ##   0.10       10               50      9721.570  0.01815925  3357.266
-    ##   0.10       10              100      9745.811  0.01921575  3392.652
-    ##   0.10       10              200      9778.361  0.01995047  3429.789
-    ##   0.10       10              500      9830.650  0.02206208  3492.256
-    ##   0.10       15               25      9699.083  0.01975390  3355.793
-    ##   0.10       15               50      9711.748  0.01978811  3353.222
-    ##   0.10       15              100      9739.178  0.01984670  3390.670
-    ##   0.10       15              200      9777.313  0.02000354  3432.903
-    ##   0.10       15              500      9828.902  0.01995174  3497.541
-    ##   0.15        5               25      9759.302  0.01743758  3398.341
-    ##   0.15        5               50      9759.182  0.02079487  3391.500
-    ##   0.15        5              100      9757.669  0.02096757  3384.020
-    ##   0.15        5              200      9807.727  0.02306613  3448.678
-    ##   0.15        5              500      9872.600  0.02326435  3520.268
-    ##   0.15       10               25      9752.534  0.01630269  3408.480
-    ##   0.15       10               50      9748.848  0.02028807  3409.555
-    ##   0.15       10              100      9767.135  0.02018404  3423.166
-    ##   0.15       10              200      9850.005  0.01890529  3517.946
-    ##   0.15       10              500      9849.784  0.02387906  3502.641
-    ##   0.15       15               25      9699.196  0.02039559  3341.802
-    ##   0.15       15               50      9723.835  0.01974028  3374.918
-    ##   0.15       15              100      9797.122  0.01692252  3445.554
-    ##   0.15       15              200      9800.831  0.01997029  3465.789
-    ##   0.15       15              500      9822.600  0.02212323  3433.596
+    ##   0.05        5               25      9660.332  0.02310945  3329.600
+    ##   0.05        5               50      9693.729  0.02327142  3331.728
+    ##   0.05        5              100      9724.117  0.02643398  3357.145
+    ##   0.05        5              200      9742.271  0.02764220  3382.531
+    ##   0.05        5              500      9770.473  0.02935317  3394.057
+    ##   0.05       10               25      9660.526  0.02162262  3323.706
+    ##   0.05       10               50      9687.252  0.02424413  3334.436
+    ##   0.05       10              100      9736.245  0.02555394  3390.625
+    ##   0.05       10              200      9756.934  0.02494414  3394.023
+    ##   0.05       10              500      9764.988  0.02693048  3390.032
+    ##   0.05       15               25      9683.958  0.02305793  3371.284
+    ##   0.05       15               50      9706.167  0.02575050  3368.219
+    ##   0.05       15              100      9737.317  0.02740000  3389.228
+    ##   0.05       15              200      9743.459  0.02678207  3371.839
+    ##   0.05       15              500      9769.067  0.02614164  3400.701
+    ##   0.10        5               25      9705.288  0.02294646  3346.828
+    ##   0.10        5               50      9738.173  0.02470300  3378.075
+    ##   0.10        5              100      9717.710  0.02784440  3338.843
+    ##   0.10        5              200      9741.236  0.03086859  3394.926
+    ##   0.10        5              500      9785.715  0.03273879  3400.566
+    ##   0.10       10               25      9686.178  0.02481187  3326.539
+    ##   0.10       10               50      9730.641  0.02563394  3350.020
+    ##   0.10       10              100      9728.520  0.02781100  3376.151
+    ##   0.10       10              200      9738.707  0.03063508  3387.170
+    ##   0.10       10              500      9805.298  0.03235338  3444.720
+    ##   0.10       15               25      9686.596  0.02625591  3345.159
+    ##   0.10       15               50      9709.656  0.02852354  3337.125
+    ##   0.10       15              100      9728.475  0.02890160  3366.337
+    ##   0.10       15              200      9772.426  0.02509227  3396.203
+    ##   0.10       15              500      9816.273  0.02729671  3451.269
+    ##   0.15        5               25      9741.383  0.02584014  3388.616
+    ##   0.15        5               50      9775.595  0.02480295  3399.772
+    ##   0.15        5              100      9739.607  0.03024787  3368.060
+    ##   0.15        5              200      9767.281  0.03090752  3406.267
+    ##   0.15        5              500      9891.022  0.03173697  3485.586
+    ##   0.15       10               25      9749.907  0.02369402  3396.823
+    ##   0.15       10               50      9736.626  0.02734783  3390.996
+    ##   0.15       10              100      9772.871  0.02917042  3414.598
+    ##   0.15       10              200      9819.804  0.02790661  3478.572
+    ##   0.15       10              500      9894.400  0.02798405  3463.045
+    ##   0.15       15               25      9685.748  0.02969272  3323.342
+    ##   0.15       15               50      9705.650  0.02993872  3348.702
+    ##   0.15       15              100      9754.836  0.02798665  3415.386
+    ##   0.15       15              200      9791.254  0.02783157  3428.117
+    ##   0.15       15              500      9855.793  0.03034111  3397.982
     ## 
     ## Tuning parameter 'interaction.depth' was held constant at a value of 1
     ## RMSE was used to select the optimal model using the smallest value.
@@ -464,7 +583,10 @@ Test the model on the test dataset.
     modelB
 
     ##         RMSE     Rsquared          MAE 
-    ## 9.510725e+03 8.630643e-03 3.594156e+03
+    ## 9.475592e+03 1.679294e-02 3.582383e+03
 
-Out of the two models, the one with the lowest RMSE of 9510.7248 was the
+Best Model
+----------
+
+Out of the two models, the one with the lowest RMSE of 9475.5918 was the
 boosted tree model
