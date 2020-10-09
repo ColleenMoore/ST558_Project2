@@ -39,6 +39,9 @@ include:
 -   num\_self\_hrefs: Number of links to other articles published by
     Mashable  
 -   average\_token\_length: Average length of the words in the content  
+-   is\_weekend: Is it a weekend day?
+-   self\_reference\_avg\_sharess: Avg. shares of referenced articles in
+    Mashable
 -   global\_sentiment\_polarity: Text sentiment polarity
 -   data\_channel - which is a derived variable from:
     -   data\_channel\_is\_lifestyle: Is data channel ‘Lifestyle’?
@@ -85,10 +88,10 @@ produce an effective model.
 I would expect the boosted tree model to perform better for all the
 predictions.
 
-I wanted to get an idea of the data that I’ll be using in this project.
-
 Read in the data
 ----------------
+
+To get an idea of the data I will be working with.
 
     news<- read_csv("OnlineNewsPopularity.csv")
 
@@ -132,13 +135,29 @@ Use the apply & render function to create each of the 7 reports
              output_file = x[[1]], params = x[[2]])
     })
 
+    ## Warning: `funs()` is deprecated as of dplyr 0.8.0.
+    ## Please use a list of either functions or lambdas: 
+    ## 
+    ##   # Simple named list: 
+    ##   list(mean = mean, median = median)
+    ## 
+    ##   # Auto named with `tibble::lst()`: 
+    ##   tibble::lst(mean, median)
+    ## 
+    ##   # Using lambdas
+    ##   list(~ mean(., trim = .2), ~ median(., na.rm = TRUE))
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_warnings()` to see where this warning was generated.
+
 Daily Analysis
 --------------
 
-The analysis for [Monday is available here](MondayAnalysis.md). The
-analysis for [Tuesday is available here](TuesdayAnalysis.md). The
-analysis for [Wednesday is available here](WednesdayAnalysis.md). The
-analysis for [Thursday is available here](ThursdayAnalysis.md). The
-analysis for [Friday is available here](FridayAnalysis.md). The analysis
-for [Saturday is available here](SaturdayAnalysis.md). The analysis for
-[Sunday is available here](SundayAnalysis.md).
+Below are the reports for each day of the week:
+
+    * [Monday](MondayAnalysis.md)    
+    * [Tuesday](TuesdayAnalysis.md)    
+    * [Wednesday](WednesdayAnalysis.md)    
+    * [Thursday](ThursdayAnalysis.md)    
+    * [Friday](FridayAnalysis.md)  
+    * [Saturday](SaturdayAnalysis.md)  
+    * [Sunday](SundayAnalysis.md)  

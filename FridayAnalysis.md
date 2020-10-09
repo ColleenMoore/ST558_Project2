@@ -3,27 +3,41 @@ ProjectCode
 Colleen Moore
 10/8/2020
 
--   [\*\* Analysis for Friday\*\*](#analysis-for-friday)
+-   [\*\* Analysis for Friday \*\*](#analysis-for-friday)
+    -   [Read in data](#read-in-data)
+        -   [Filter for the day of the
+            week](#filter-for-the-day-of-the-week)
     -   [Variable selection](#variable-selection)
+        -   [Code for variable select and
+            modification](#code-for-variable-select-and-modification)
+        -   [Check dataset for missing
+            values](#check-dataset-for-missing-values)
     -   [Create Training and Test Sets](#create-training-and-test-sets)
     -   [Summarizations](#summarizations)
+        -   [Summary of all the included
+            variables](#summary-of-all-the-included-variables)
+        -   [Correlation plot](#correlation-plot)
+        -   [Boxplots](#boxplots)
+        -   [Scatterplot](#scatterplot)
     -   [Modeling](#modeling)
         -   [Tree based Model](#tree-based-model)
         -   [Boosted Tree Model](#boosted-tree-model)
     -   [Best Model](#best-model)
 
-\*\* Analysis for Friday\*\*
-============================
+\*\* Analysis for Friday \*\*
+=============================
 
 Read in data
+------------
 
     news<- read_csv("OnlineNewsPopularity.csv")
 
-Filter for the day of the week
+### Filter for the day of the week
 
     dailyNews <- filter(news, news[[paste0("weekday_is_",params$day)]] == "1")
 
-### Variable selection
+Variable selection
+------------------
 
 The variables I chose were:
 
@@ -47,7 +61,7 @@ The variables I chose were:
     -   data\_channel\_is\_world: Is data channel ‘World’?
 -   title\_sentiment\_polarity: Title polarity
 
-<!-- -->
+### Code for variable select and modification
 
     dailyNews<- dailyNews %>% 
       mutate(channel= case_when(data_channel_is_bus == 1 ~ "Business",
@@ -60,7 +74,7 @@ The variables I chose were:
              average_token_length, title_sentiment_polarity, global_sentiment_polarity,
              self_reference_avg_sharess, shares, channel)
 
-Check dataset for missing values
+### Check dataset for missing values
 
     miss<- dailyNews %>% summarise_all(funs(sum(is.na(.))))
     kable(miss)
@@ -162,6 +176,8 @@ training and 30% will be used for testing.
 
 Summarizations
 --------------
+
+### Summary of all the included variables
 
 Quick summary of all the variables in the dataset. Wanted to get an idea
 of the ranges of the variables.
@@ -422,6 +438,8 @@ Max.
 </tbody>
 </table>
 
+### Correlation plot
+
 Correlation plot of variable choosen to be included in model. Seeing if
 any of the chosen variables are highly correlated with the response
 variable shares or among each other.
@@ -434,6 +452,8 @@ variable shares or among each other.
 None of the variables appear to have a high correlation with the shares
 variable.
 
+### Boxplots
+
 Boxplots of all the variables to be used in the model to get an idea of
 shape and if outliers are present.
 
@@ -445,6 +465,8 @@ shape and if outliers are present.
     geom_boxplot()
 
 ![](FridayAnalysis_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+
+### Scatterplot
 
 Below is a plot of self\_reference\_avg\_sharess (Avg. shares of
 referenced articles in Mashable) and shares category.

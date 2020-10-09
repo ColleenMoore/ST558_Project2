@@ -8,7 +8,7 @@ output:
 params:
   day: ""
 ---
-# ** Analysis for `r capitalize(params$day) `**
+# ** Analysis for `r capitalize(params$day) ` **
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -21,19 +21,19 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-Read in data
+## Read in data
 ```{r, message=F, warning=FALSE}
 news<- read_csv("OnlineNewsPopularity.csv")
 ```
 
 
-Filter for the day of the week
+### Filter for the day of the week
 ```{r}
 dailyNews <- filter(news, news[[paste0("weekday_is_",params$day)]] == "1")
 ```
 
 
-### Variable selection 
+## Variable selection 
 The variables I chose were:
 
 * n_tokens_title: Number of words in the title    
@@ -53,6 +53,7 @@ The variables I chose were:
     + data_channel_is_world: Is data channel 'World'? 
 * title_sentiment_polarity: Title polarity 
 
+### Code for variable select and modification
 ```{r}
 dailyNews<- dailyNews %>% 
   mutate(channel= case_when(data_channel_is_bus == 1 ~ "Business",
@@ -66,7 +67,7 @@ dailyNews<- dailyNews %>%
          self_reference_avg_sharess, shares, channel)
 ```
 
-Check dataset for missing values
+### Check dataset for missing values
 ```{r, message=F, warning=FALSE}
 miss<- dailyNews %>% summarise_all(funs(sum(is.na(.))))
 kable(miss)
@@ -92,12 +93,15 @@ dailyNewsTest <- dailyNews[test, ]
 
 ## Summarizations
 
+### Summary of all the included variables 
+
 Quick summary of all the variables in the dataset. Wanted to get an idea of the ranges of the variables. 
 
 ```{r}
 kable(apply(dailyNewsTrain[1:10], 2, summary), caption = paste("Summary of Variables"), digits= 1)
 ```
 
+### Correlation plot
 
 Correlation plot of variable choosen to be included in model. Seeing if any of the chosen variables are highly correlated with the response variable shares or among each other. 
 
@@ -108,6 +112,8 @@ corrplot(correlation)
 
 None of the variables appear to have a high correlation with the shares variable. 
 
+### Boxplots 
+
 Boxplots of all the variables to be used in the model to get an idea of shape and if outliers are present. 
 ```{r}
 dailyNewsTrain %>%
@@ -117,6 +123,8 @@ ggplot(aes(x = value)) +
 facet_wrap(~ name, scales = "free") +
 geom_boxplot()
 ```
+
+### Scatterplot 
 
 Below is a plot of self_reference_avg_sharess (Avg. shares of referenced articles in Mashable) and shares category.  
 ```{r}

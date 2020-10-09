@@ -97,19 +97,15 @@ apply(reports, MARGIN = 1, FUN = function(x){
 ```
 
 ## Daily Analysis
-The analysis for [Monday is available here](MondayAnalysis.md).
+Below are the reports for each day of the week:
 
-The analysis for [Tuesday is available here](TuesdayAnalysis.md).
-
-The analysis for [Wednesday is available here](WednesdayAnalysis.md).
-
-The analysis for [Thursday is available here](ThursdayAnalysis.md).
-
-The analysis for [Friday is available here](FridayAnalysis.md).
-
-The analysis for [Saturday is available here](SaturdayAnalysis.md).
-
-The analysis for [Sunday is available here](SundayAnalysis.md).
+    * [Monday](MondayAnalysis.md)    
+    * [Tuesday](TuesdayAnalysis.md)    
+    * [Wednesday](WednesdayAnalysis.md)    
+    * [Thursday](ThursdayAnalysis.md)    
+    * [Friday](FridayAnalysis.md)  
+    * [Saturday](SaturdayAnalysis.md)  
+    * [Sunday](SundayAnalysis.md)  
 
 
 
