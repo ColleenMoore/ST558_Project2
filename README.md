@@ -39,7 +39,6 @@ include:
 -   num\_self\_hrefs: Number of links to other articles published by
     Mashable  
 -   average\_token\_length: Average length of the words in the content  
--   is\_weekend: Is it a weekend day?
 -   self\_reference\_avg\_sharess: Avg. shares of referenced articles in
     Mashable
 -   global\_sentiment\_polarity: Text sentiment polarity
@@ -135,29 +134,15 @@ Use the apply & render function to create each of the 7 reports
              output_file = x[[1]], params = x[[2]])
     })
 
-    ## Warning: `funs()` is deprecated as of dplyr 0.8.0.
-    ## Please use a list of either functions or lambdas: 
-    ## 
-    ##   # Simple named list: 
-    ##   list(mean = mean, median = median)
-    ## 
-    ##   # Auto named with `tibble::lst()`: 
-    ##   tibble::lst(mean, median)
-    ## 
-    ##   # Using lambdas
-    ##   list(~ mean(., trim = .2), ~ median(., na.rm = TRUE))
-    ## This warning is displayed once every 8 hours.
-    ## Call `lifecycle::last_warnings()` to see where this warning was generated.
-
 Daily Analysis
 --------------
 
 Below are the reports for each day of the week:
 
-    * [Monday](MondayAnalysis.md)    
-    * [Tuesday](TuesdayAnalysis.md)    
-    * [Wednesday](WednesdayAnalysis.md)    
-    * [Thursday](ThursdayAnalysis.md)    
-    * [Friday](FridayAnalysis.md)  
-    * [Saturday](SaturdayAnalysis.md)  
-    * [Sunday](SundayAnalysis.md)  
+-   [Monday’s Report](MondayAnalysis.md)  
+-   [Tuesday’s Report](TuesdayAnalysis.md)  
+-   [Wednesday’s Report](WednesdayAnalysis.md)  
+-   [Thursday’s Report](ThursdayAnalysis.md)  
+-   [Friday’s Report](FridayAnalysis.md)  
+-   [Saturday’s Report](SaturdayAnalysis.md)  
+-   [Sunday’s Report](SundayAnalysis.md)
