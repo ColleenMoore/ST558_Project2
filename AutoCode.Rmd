@@ -31,7 +31,6 @@ For the model building, the variables that I think are important include:
 * num_imgs: Number of images     
 * num_self_hrefs: Number of links to other articles published by Mashable   
 * average_token_length: Average length of the words in the content  
-* is_weekend: Is it a weekend day? 
 * self_reference_avg_sharess: Avg. shares of referenced articles in Mashable 
 * global_sentiment_polarity: Text sentiment polarity
 * data_channel - which is  a derived variable from:
@@ -89,7 +88,7 @@ reports <- tibble(filename = output_file, params)
 ```
 
 Use the apply & render function to create each of the 7 reports
-```{r , echo = TRUE, message = FALSE, results= "hide"}
+```{r , echo = TRUE, message = FALSE, results= "hide", warning=F}
 apply(reports, MARGIN = 1, FUN = function(x){
   render("ProjectCode.Rmd", 
          output_file = x[[1]], params = x[[2]])
@@ -99,13 +98,13 @@ apply(reports, MARGIN = 1, FUN = function(x){
 ## Daily Analysis
 Below are the reports for each day of the week:
 
-    * [Monday](MondayAnalysis.md)    
-    * [Tuesday](TuesdayAnalysis.md)    
-    * [Wednesday](WednesdayAnalysis.md)    
-    * [Thursday](ThursdayAnalysis.md)    
-    * [Friday](FridayAnalysis.md)  
-    * [Saturday](SaturdayAnalysis.md)  
-    * [Sunday](SundayAnalysis.md)  
+* [Monday's Report](MondayAnalysis.md)      
+* [Tuesday's Report](TuesdayAnalysis.md)      
+* [Wednesday's Report](WednesdayAnalysis.md)      
+* [Thursday's Report](ThursdayAnalysis.md)      
+* [Friday's Report](FridayAnalysis.md)    
+* [Saturday's Report](SaturdayAnalysis.md)    
+* [Sunday's Report](SundayAnalysis.md)    
 
 
 
