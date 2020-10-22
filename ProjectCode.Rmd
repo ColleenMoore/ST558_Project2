@@ -20,7 +20,6 @@ library(kableExtra)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
 ## Read in data
 ```{r, message=F, warning=FALSE}
 news<- read_csv("OnlineNewsPopularity.csv")
@@ -172,6 +171,24 @@ boostedTree <-train(shares ~ ., data= dailyNewsTrain, method='gbm',
 boostedTree
 ```
 
+## Part 2 - Laura Mathews
+
+For the second portion of this project, the data was used to fit a linear model.
+
+```{r}
+#Train the model on the train data set
+lm <- train(shares ~ ., data = dailyNewsTrain, method = "lm",
+            preProcess = c("center", "scale"),
+            trControl = trainControl(method = "cv", number = 10))
+
+#Predict on the test set
+predLm <- predict(lm, newdata = dailyNewsTest)
+
+modelL <- postResample(predLm, dailyNewsTest$shares)
+modelL
+
+```
+
 Test the model on the test dataset. 
 
 ```{r}
@@ -181,7 +198,7 @@ modelB
 ```
 
 ## Best Model
-Out of the two models, the one with the lowest RMSE of  `r  round(min(modelA[1], modelB[1]),4)` was the `r ifelse(modelA[1] < modelB[1], "tree based model", "boosted tree model")`
+Out of the two models, the one with the lowest RMSE of  `r  round(min(modelA[1], modelB[1]),modelL[1])` was the `r ifelse(min(modelA[1], modelB[1], modelL[1]) == modelA[1], "tree based model", ifelse(min(modelA[1], modelB[1], modelL[1]) == modelB[1], "boosted tree model", "linear model"))`
 
 
 
