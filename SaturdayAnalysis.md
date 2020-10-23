@@ -3,776 +3,440 @@ ProjectCode
 Colleen Moore
 10/8/2020
 
-  - [\*\* Analysis for Saturday \*\*](#analysis-for-saturday)
-      - [Read in data](#read-in-data)
-          - [Filter for the day of the
+-   [\*\* Analysis for Saturday \*\*](#analysis-for-saturday)
+    -   [Read in data](#read-in-data)
+        -   [Filter for the day of the
             week](#filter-for-the-day-of-the-week)
-      - [Variable selection](#variable-selection)
-          - [Code for variable select and
+    -   [Variable selection](#variable-selection)
+        -   [Code for variable select and
             modification](#code-for-variable-select-and-modification)
-          - [Check dataset for missing
+        -   [Check dataset for missing
             values](#check-dataset-for-missing-values)
-      - [Create Training and Test Sets](#create-training-and-test-sets)
-      - [Summarizations](#summarizations)
-          - [Summary of all the included
+    -   [Create Training and Test Sets](#create-training-and-test-sets)
+    -   [Summarizations](#summarizations)
+        -   [Summary of all the included
             variables](#summary-of-all-the-included-variables)
-          - [Correlation plot](#correlation-plot)
-          - [Boxplots](#boxplots)
-          - [Scatterplot](#scatterplot)
-      - [Modeling](#modeling)
-          - [Tree based Model](#tree-based-model)
-          - [Boosted Tree Model](#boosted-tree-model)
-      - [Part 2 - Laura Mathews](#part-2---laura-mathews)
-      - [Best Model](#best-model)
+        -   [Correlation plot](#correlation-plot)
+        -   [Boxplots](#boxplots)
+        -   [Scatterplot](#scatterplot)
+    -   [Modeling](#modeling)
+        -   [Tree based Model](#tree-based-model)
+        -   [Boosted Tree Model](#boosted-tree-model)
+    -   [Part 2 - Laura Mathews](#part-2---laura-mathews)
+    -   [Best Model](#best-model)
 
-# \*\* Analysis for Saturday \*\*
+\*\* Analysis for Saturday \*\*
+===============================
 
-## Read in data
+Read in data
+------------
 
-``` r
-news<- read_csv("OnlineNewsPopularity.csv")
-```
+    news<- read_csv("OnlineNewsPopularity.csv")
 
 ### Filter for the day of the week
 
-``` r
-dailyNews <- filter(news, news[[paste0("weekday_is_",params$day)]] == "1")
-```
+    dailyNews <- filter(news, news[[paste0("weekday_is_",params$day)]] == "1")
 
-## Variable selection
+Variable selection
+------------------
 
 The variables I chose were:
 
-  - n\_tokens\_title: Number of words in the title  
-  - n\_tokens\_content: Number of words in the content  
-  - n\_unique\_tokens: Rate of unique words in the content  
-  - num\_imgs: Number of images  
-  - num\_self\_hrefs: Number of links to other articles published by
+-   n\_tokens\_title: Number of words in the title  
+-   n\_tokens\_content: Number of words in the content  
+-   n\_unique\_tokens: Rate of unique words in the content  
+-   num\_imgs: Number of images  
+-   num\_self\_hrefs: Number of links to other articles published by
     Mashable  
-  - average\_token\_length: Average length of the words in the content  
-  - self\_reference\_avg\_sharess: Avg. shares of referenced articles in
+-   average\_token\_length: Average length of the words in the content  
+-   self\_reference\_avg\_sharess: Avg. shares of referenced articles in
     Mashable
-  - global\_sentiment\_polarity: Text sentiment polarity
-  - data\_channel - which is a derived variable from:
-      - data\_channel\_is\_lifestyle: Is data channel ‘Lifestyle’?
-      - data\_channel\_is\_entertainment: Is data channel
+-   global\_sentiment\_polarity: Text sentiment polarity
+-   data\_channel - which is a derived variable from:
+    -   data\_channel\_is\_lifestyle: Is data channel ‘Lifestyle’?
+    -   data\_channel\_is\_entertainment: Is data channel
         ‘Entertainment’?
-      - data\_channel\_is\_bus: Is data channel ‘Business’?
-      - data\_channel\_is\_socmed: Is data channel ‘Social Media’?
-      - data\_channel\_is\_tech: Is data channel ‘Tech’?
-      - data\_channel\_is\_world: Is data channel ‘World’?
-  - title\_sentiment\_polarity: Title polarity
+    -   data\_channel\_is\_bus: Is data channel ‘Business’?
+    -   data\_channel\_is\_socmed: Is data channel ‘Social Media’?
+    -   data\_channel\_is\_tech: Is data channel ‘Tech’?
+    -   data\_channel\_is\_world: Is data channel ‘World’?
+-   title\_sentiment\_polarity: Title polarity
 
 ### Code for variable select and modification
 
-``` r
-dailyNews<- dailyNews %>% 
-  mutate(channel= case_when(data_channel_is_bus == 1 ~ "Business",
-                                         data_channel_is_entertainment==1 ~"Entertainment",
-                                            data_channel_is_lifestyle== 1 ~ "Lifesytle",
-                                            data_channel_is_socmed==1 ~ "SocialMedia",
-                                            data_channel_is_tech==1 ~ "Tech",
-                                            data_channel_is_world== 1 ~ "World")) %>% 
-  select(n_tokens_title, n_tokens_content, n_unique_tokens, num_imgs, num_self_hrefs, 
-         average_token_length, title_sentiment_polarity, global_sentiment_polarity,
-         self_reference_avg_sharess, shares, channel)
-```
+    dailyNews<- dailyNews %>% 
+      mutate(channel= case_when(data_channel_is_bus == 1 ~ "Business",
+                                             data_channel_is_entertainment==1 ~"Entertainment",
+                                                data_channel_is_lifestyle== 1 ~ "Lifesytle",
+                                                data_channel_is_socmed==1 ~ "SocialMedia",
+                                                data_channel_is_tech==1 ~ "Tech",
+                                                data_channel_is_world== 1 ~ "World")) %>% 
+      select(n_tokens_title, n_tokens_content, n_unique_tokens, num_imgs, num_self_hrefs, 
+             average_token_length, title_sentiment_polarity, global_sentiment_polarity,
+             self_reference_avg_sharess, shares, channel)
 
 ### Check dataset for missing values
 
-``` r
-miss<- dailyNews %>% summarise_all(funs(sum(is.na(.))))
-kable(miss)
-```
+    miss<- dailyNews %>% summarise_all(funs(sum(is.na(.))))
+    kable(miss)
 
 <table>
-
 <thead>
-
 <tr>
-
 <th style="text-align:right;">
-
 n\_tokens\_title
-
 </th>
-
 <th style="text-align:right;">
-
 n\_tokens\_content
-
 </th>
-
 <th style="text-align:right;">
-
 n\_unique\_tokens
-
 </th>
-
 <th style="text-align:right;">
-
 num\_imgs
-
 </th>
-
 <th style="text-align:right;">
-
 num\_self\_hrefs
-
 </th>
-
 <th style="text-align:right;">
-
 average\_token\_length
-
 </th>
-
 <th style="text-align:right;">
-
 title\_sentiment\_polarity
-
 </th>
-
 <th style="text-align:right;">
-
 global\_sentiment\_polarity
-
 </th>
-
 <th style="text-align:right;">
-
 self\_reference\_avg\_sharess
-
 </th>
-
 <th style="text-align:right;">
-
 shares
-
 </th>
-
 <th style="text-align:right;">
-
 channel
-
 </th>
-
 </tr>
-
 </thead>
-
 <tbody>
-
 <tr>
-
 <td style="text-align:right;">
-
 0
-
 </td>
-
 <td style="text-align:right;">
-
 0
-
 </td>
-
 <td style="text-align:right;">
-
 0
-
 </td>
-
 <td style="text-align:right;">
-
 0
-
 </td>
-
 <td style="text-align:right;">
-
 0
-
 </td>
-
 <td style="text-align:right;">
-
 0
-
 </td>
-
 <td style="text-align:right;">
-
 0
-
 </td>
-
 <td style="text-align:right;">
-
 0
-
 </td>
-
 <td style="text-align:right;">
-
 0
-
 </td>
-
 <td style="text-align:right;">
-
 0
-
 </td>
-
 <td style="text-align:right;">
-
 424
-
 </td>
-
 </tr>
-
 </tbody>
-
 </table>
 
 Since I created a new variable channel, some news articles did not fall
 into any of the listed categories and so are NA values. Replace the NA
 values with “None”
 
-``` r
-dailyNews$channel <- ifelse(is.na(dailyNews$channel), "None", dailyNews$channel)
-```
+    dailyNews$channel <- ifelse(is.na(dailyNews$channel), "None", dailyNews$channel)
 
-## Create Training and Test Sets
+Create Training and Test Sets
+-----------------------------
 
 Split data into training and test set- 70% of the data will be used for
 training and 30% will be used for testing.
 
-``` r
-set.seed(2011)
-train <- sample(1:nrow(dailyNews), size = nrow(dailyNews)*0.7)
-test <- setdiff(1:nrow(dailyNews), train)
-dailyNewsTrain <- dailyNews[train, ]
-dailyNewsTest <- dailyNews[test, ]
-```
+    set.seed(2011)
+    train <- sample(1:nrow(dailyNews), size = nrow(dailyNews)*0.7)
+    test <- setdiff(1:nrow(dailyNews), train)
+    dailyNewsTrain <- dailyNews[train, ]
+    dailyNewsTest <- dailyNews[test, ]
 
-## Summarizations
+Summarizations
+--------------
 
 ### Summary of all the included variables
 
 Quick summary of all the variables in the dataset. Wanted to get an idea
 of the ranges of the variables.
 
-``` r
-kable(apply(dailyNewsTrain[1:10], 2, summary), caption = paste("Summary of Variables"), digits= 1)
-```
+    kable(apply(dailyNewsTrain[1:10], 2, summary), caption = paste("Summary of Variables"), digits= 1)
 
 <table>
-
 <caption>
-
 Summary of Variables
-
 </caption>
-
 <thead>
-
 <tr>
-
 <th style="text-align:left;">
-
 </th>
-
 <th style="text-align:right;">
-
 n\_tokens\_title
-
 </th>
-
 <th style="text-align:right;">
-
 n\_tokens\_content
-
 </th>
-
 <th style="text-align:right;">
-
 n\_unique\_tokens
-
 </th>
-
 <th style="text-align:right;">
-
 num\_imgs
-
 </th>
-
 <th style="text-align:right;">
-
 num\_self\_hrefs
-
 </th>
-
 <th style="text-align:right;">
-
 average\_token\_length
-
 </th>
-
 <th style="text-align:right;">
-
 title\_sentiment\_polarity
-
 </th>
-
 <th style="text-align:right;">
-
 global\_sentiment\_polarity
-
 </th>
-
 <th style="text-align:right;">
-
 self\_reference\_avg\_sharess
-
 </th>
-
 <th style="text-align:right;">
-
 shares
-
 </th>
-
 </tr>
-
 </thead>
-
 <tbody>
-
 <tr>
-
 <td style="text-align:left;">
-
 Min.
-
 </td>
-
 <td style="text-align:right;">
-
 5.0
-
 </td>
-
 <td style="text-align:right;">
-
 0.0
-
 </td>
-
 <td style="text-align:right;">
-
 0.0
-
 </td>
-
 <td style="text-align:right;">
-
 0.0
-
 </td>
-
 <td style="text-align:right;">
-
 0.0
-
 </td>
-
 <td style="text-align:right;">
-
 0.0
-
 </td>
-
 <td style="text-align:right;">
-
-\-1.0
-
+-1.0
 </td>
-
 <td style="text-align:right;">
-
-\-0.3
-
+-0.3
 </td>
-
 <td style="text-align:right;">
-
 0.0
-
 </td>
-
 <td style="text-align:right;">
-
 49.0
-
 </td>
-
 </tr>
-
 <tr>
-
 <td style="text-align:left;">
-
 1st Qu.
-
 </td>
-
 <td style="text-align:right;">
-
 9.0
-
 </td>
-
 <td style="text-align:right;">
-
 277.0
-
 </td>
-
 <td style="text-align:right;">
-
 0.5
-
 </td>
-
 <td style="text-align:right;">
-
 1.0
-
 </td>
-
 <td style="text-align:right;">
-
 1.0
-
 </td>
-
 <td style="text-align:right;">
-
 4.5
-
 </td>
-
 <td style="text-align:right;">
-
 0.0
-
 </td>
-
 <td style="text-align:right;">
-
 0.1
-
 </td>
-
 <td style="text-align:right;">
-
 1000.0
-
 </td>
-
 <td style="text-align:right;">
-
 1300.0
-
 </td>
-
 </tr>
-
 <tr>
-
 <td style="text-align:left;">
-
 Median
-
 </td>
-
 <td style="text-align:right;">
-
 10.0
-
 </td>
-
 <td style="text-align:right;">
-
 506.0
-
 </td>
-
 <td style="text-align:right;">
-
 0.5
-
 </td>
-
 <td style="text-align:right;">
-
 1.0
-
 </td>
-
 <td style="text-align:right;">
-
 3.0
-
 </td>
-
 <td style="text-align:right;">
-
 4.7
-
 </td>
-
 <td style="text-align:right;">
-
 0.0
-
 </td>
-
 <td style="text-align:right;">
-
 0.1
-
 </td>
-
 <td style="text-align:right;">
-
 2340.0
-
 </td>
-
 <td style="text-align:right;">
-
 2000.0
-
 </td>
-
 </tr>
-
 <tr>
-
 <td style="text-align:left;">
-
 Mean
-
 </td>
-
 <td style="text-align:right;">
-
 10.3
-
 </td>
-
 <td style="text-align:right;">
-
 602.3
-
 </td>
-
 <td style="text-align:right;">
-
 0.5
-
 </td>
-
 <td style="text-align:right;">
-
 5.4
-
 </td>
-
 <td style="text-align:right;">
-
 3.9
-
 </td>
-
 <td style="text-align:right;">
-
 4.5
-
 </td>
-
 <td style="text-align:right;">
-
 0.1
-
 </td>
-
 <td style="text-align:right;">
-
 0.1
-
 </td>
-
 <td style="text-align:right;">
-
 5358.3
-
 </td>
-
 <td style="text-align:right;">
-
 4023.7
-
 </td>
-
 </tr>
-
 <tr>
-
 <td style="text-align:left;">
-
 3rd Qu.
-
 </td>
-
 <td style="text-align:right;">
-
 12.0
-
 </td>
-
 <td style="text-align:right;">
-
 783.0
-
 </td>
-
 <td style="text-align:right;">
-
 0.6
-
 </td>
-
 <td style="text-align:right;">
-
 8.0
-
 </td>
-
 <td style="text-align:right;">
-
 4.0
-
 </td>
-
 <td style="text-align:right;">
-
 4.9
-
 </td>
-
 <td style="text-align:right;">
-
 0.2
-
 </td>
-
 <td style="text-align:right;">
-
 0.2
-
 </td>
-
 <td style="text-align:right;">
-
 5200.0
-
 </td>
-
 <td style="text-align:right;">
-
 3600.0
-
 </td>
-
 </tr>
-
 <tr>
-
 <td style="text-align:left;">
-
 Max.
-
 </td>
-
 <td style="text-align:right;">
-
 18.0
-
 </td>
-
 <td style="text-align:right;">
-
 7004.0
-
 </td>
-
 <td style="text-align:right;">
-
 0.9
-
 </td>
-
 <td style="text-align:right;">
-
 101.0
-
 </td>
-
 <td style="text-align:right;">
-
 74.0
-
 </td>
-
 <td style="text-align:right;">
-
 6.3
-
 </td>
-
 <td style="text-align:right;">
-
 1.0
-
 </td>
-
 <td style="text-align:right;">
-
 0.6
-
 </td>
-
 <td style="text-align:right;">
-
 309412.0
-
 </td>
-
 <td style="text-align:right;">
-
 617900.0
-
 </td>
-
 </tr>
-
 </tbody>
-
 </table>
 
 ### Correlation plot
@@ -781,10 +445,8 @@ Correlation plot of variable choosen to be included in model. Seeing if
 any of the chosen variables are highly correlated with the response
 variable shares or among each other.
 
-``` r
-correlation <- dailyNewsTrain %>% keep(is.numeric) %>% cor()
-corrplot(correlation)
-```
+    correlation <- dailyNewsTrain %>% keep(is.numeric) %>% cor()
+    corrplot(correlation)
 
 ![](SaturdayAnalysis_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
@@ -796,14 +458,12 @@ variable.
 Boxplots of all the variables to be used in the model to get an idea of
 shape and if outliers are present.
 
-``` r
-dailyNewsTrain %>%
-keep(is.numeric) %>%
-pivot_longer(everything()) %>%
-ggplot(aes(x = value)) +
-facet_wrap(~ name, scales = "free") +
-geom_boxplot()
-```
+    dailyNewsTrain %>%
+    keep(is.numeric) %>%
+    pivot_longer(everything()) %>%
+    ggplot(aes(x = value)) +
+    facet_wrap(~ name, scales = "free") +
+    geom_boxplot()
 
 ![](SaturdayAnalysis_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
@@ -812,16 +472,15 @@ geom_boxplot()
 Below is a plot of self\_reference\_avg\_sharess (Avg. shares of
 referenced articles in Mashable) and shares category.
 
-``` r
-ggplot(dailyNewsTrain, aes(self_reference_avg_sharess,shares))+ 
-  geom_point()+ geom_jitter() + 
-  labs(x= "Number of links to other articles", y= "Number of times shared category", 
-       title= "Links and Number of Times Shared")
-```
+    ggplot(dailyNewsTrain, aes(self_reference_avg_sharess,shares))+ 
+      geom_point()+ geom_jitter() + 
+      labs(x= "Number of links to other articles", y= "Number of times shared category", 
+           title= "Links and Number of Times Shared")
 
 ![](SaturdayAnalysis_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
-## Modeling
+Modeling
+--------
 
 ### Tree based Model
 
@@ -829,13 +488,11 @@ The first model is a classification tree-based model (not ensemble)
 using leave one out cross validation. I will be using rpart from the
 `caret` package for this tree.
 
-``` r
-Tree_fit<- train(shares ~.,  data= dailyNewsTrain, method= "rpart",
-                 trControl=trainControl(method = "LOOCV"),
-                preProcess = c("center", "scale"))
+    Tree_fit<- train(shares ~.,  data= dailyNewsTrain, method= "rpart",
+                     trControl=trainControl(method = "LOOCV"),
+                    preProcess = c("center", "scale"))
 
-Tree_fit
-```
+    Tree_fit
 
     ## CART 
     ## 
@@ -857,11 +514,9 @@ Tree_fit
 
 Test the tree based model on the test data set.
 
-``` r
-pred_Tree_fit<- predict(Tree_fit, newdata= dailyNewsTest)
-modelA<- postResample(pred_Tree_fit, obs= dailyNewsTest$shares)
-modelA
-```
+    pred_Tree_fit<- predict(Tree_fit, newdata= dailyNewsTest)
+    modelA<- postResample(pred_Tree_fit, obs= dailyNewsTest$shares)
+    modelA
 
     ##         RMSE     Rsquared          MAE 
     ## 1.038594e+04 7.421950e-05 3.586352e+03
@@ -872,17 +527,15 @@ The next model is a classification boosted tree model with parameters
 choosen using cross validation. I chose the Stochastic Gradient Boosting
 method (gbm method).
 
-``` r
-fit_control <- trainControl(method="cv", number=10)
+    fit_control <- trainControl(method="cv", number=10)
 
-grid <- expand.grid(n.trees=c(25, 50, 100, 200,500), shrinkage=c(0.05, 0.1, 0.15),
-                    n.minobsinnode = c(5,10, 15),interaction.depth=1)
+    grid <- expand.grid(n.trees=c(25, 50, 100, 200,500), shrinkage=c(0.05, 0.1, 0.15),
+                        n.minobsinnode = c(5,10, 15),interaction.depth=1)
 
-boostedTree <-train(shares ~ ., data= dailyNewsTrain, method='gbm',
-                    trControl=fit_control, tuneGrid=grid, verbose= FALSE)
+    boostedTree <-train(shares ~ ., data= dailyNewsTrain, method='gbm',
+                        trControl=fit_control, tuneGrid=grid, verbose= FALSE)
 
-boostedTree
-```
+    boostedTree
 
     ## Stochastic Gradient Boosting 
     ## 
@@ -946,39 +599,37 @@ boostedTree
     ## The final values used for the model were n.trees = 25, interaction.depth =
     ##  1, shrinkage = 0.05 and n.minobsinnode = 5.
 
-## Part 2 - Laura Mathews
-
-For the second portion of this project, the data was used to fit a
-linear model.
-
-``` r
-#Train the model on the train data set
-lm <- train(shares ~ ., data = dailyNewsTrain, method = "lm",
-            preProcess = c("center", "scale"),
-            trControl = trainControl(method = "cv", number = 10))
-
-#Predict on the test set
-predLm <- predict(lm, newdata = dailyNewsTest)
-
-modelL <- postResample(predLm, dailyNewsTest$shares)
-modelL
-```
-
-    ##         RMSE     Rsquared          MAE 
-    ## 9.545305e+03 9.383325e-03 3.676530e+03
-
 Test the model on the test dataset.
 
-``` r
-pred_boostedTree<- predict(boostedTree, newdata= dailyNewsTest)
-modelB<- postResample(pred_boostedTree, obs= dailyNewsTest$shares)
-modelB
-```
+    pred_boostedTree<- predict(boostedTree, newdata= dailyNewsTest)
+    modelB<- postResample(pred_boostedTree, obs= dailyNewsTest$shares)
+    modelB
 
     ##         RMSE     Rsquared          MAE 
     ## 9.475592e+03 1.679294e-02 3.582383e+03
 
-## Best Model
+Part 2 - Laura Mathews
+----------------------
 
-Out of the two models, the one with the lowest RMSE of 9475.591761 was
+For the second portion of this project, the data was used to fit a
+linear model.
+
+    #Train the model on the train data set
+    lm <- train(shares ~ ., data = dailyNewsTrain, method = "lm",
+                preProcess = c("center", "scale"),
+                trControl = trainControl(method = "cv", number = 10))
+
+    #Predict on the test set
+    predLm <- predict(lm, newdata = dailyNewsTest)
+
+    modelL <- postResample(predLm, dailyNewsTest$shares)
+    modelL
+
+    ##         RMSE     Rsquared          MAE 
+    ## 9.545305e+03 9.383325e-03 3.676530e+03
+
+Best Model
+----------
+
+Out of the three models, the one with the lowest RMSE of 9475.591761 was
 the boosted tree model

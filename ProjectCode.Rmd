@@ -171,6 +171,14 @@ boostedTree <-train(shares ~ ., data= dailyNewsTrain, method='gbm',
 boostedTree
 ```
 
+Test the model on the test dataset. 
+
+```{r}
+pred_boostedTree<- predict(boostedTree, newdata= dailyNewsTest)
+modelB<- postResample(pred_boostedTree, obs= dailyNewsTest$shares)
+modelB
+```
+
 ## Part 2 - Laura Mathews
 
 For the second portion of this project, the data was used to fit a linear model.
@@ -189,16 +197,10 @@ modelL
 
 ```
 
-Test the model on the test dataset. 
 
-```{r}
-pred_boostedTree<- predict(boostedTree, newdata= dailyNewsTest)
-modelB<- postResample(pred_boostedTree, obs= dailyNewsTest$shares)
-modelB
-```
 
 ## Best Model
-Out of the two models, the one with the lowest RMSE of  `r  round(min(modelA[1], modelB[1]),modelL[1])` was the `r ifelse(min(modelA[1], modelB[1], modelL[1]) == modelA[1], "tree based model", ifelse(min(modelA[1], modelB[1], modelL[1]) == modelB[1], "boosted tree model", "linear model"))`
+Out of the three models, the one with the lowest RMSE of  `r  round(min(modelA[1], modelB[1]),modelL[1])` was the `r ifelse(min(modelA[1], modelB[1], modelL[1]) == modelA[1], "tree based model", ifelse(min(modelA[1], modelB[1], modelL[1]) == modelB[1], "boosted tree model", "linear model"))`
 
 
 
